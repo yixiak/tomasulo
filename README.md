@@ -5,6 +5,7 @@ This is a simulator for Speculative Tomasulo algorithm.
 # Detail
 
 The project is based on the following principles：
+- There is 1 FP Adder and 1 FP Multipler
 - In reservation station，there are 3 Load，3 Store，2 fadd and 2 fmult.
 - Record Buffer has 8 entries.
 - the instruction will begin execute 1 cycle after others write back the required result.
@@ -43,4 +44,5 @@ SD F6 0 R1
 
 # Reference
 [GZTimeWalker/tomasulo-sim](https://github.com/GZTimeWalker/tomasulo-sim)
+
 [计算机体系结构-重排序缓存ROB](https://zhuanlan.zhihu.com/p/501631371)
