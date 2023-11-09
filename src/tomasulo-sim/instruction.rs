@@ -12,6 +12,8 @@ pub enum Type {
 
 pub struct Instruction{
     pub op:Type,
+
+    pub issue_cycle: u8,
     
     
 }
