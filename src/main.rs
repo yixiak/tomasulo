@@ -1,3 +1,4 @@
+pub mod tomasulo_sim;
 fn main() {
     // test instruction
     let input1:[&str;6]=[

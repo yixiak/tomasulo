@@ -1,7 +1,7 @@
-use super::instruction::Type;
+use rs::RSType;
 
 pub struct FU{
-    pub op:Type,
+    pub op:RSType,
 
     pub remaining_cycles: Option<u8>
 }

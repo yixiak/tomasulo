@@ -1,21 +1,21 @@
 use std::collections::BTreeMap;
 
-pub enum RS_Type{
+pub enum RSType{
     LD,
     SD,
     ADD,
     MULT,
 }
 
-pub struct RSId(u8,RS_Type);
+pub struct RSId(u8,RSType);
 
-pub enum RS_State{
+pub enum RSState{
     Busy,
     Free
 }
 
-pub struct RS_inner{
-    pub state: RS_State,
+pub struct RSinner{
+    pub state: RSState,
     pub vj: u8,
     pub vk: u8,
     //pub qj: ROB
@@ -24,5 +24,5 @@ pub struct RS_inner{
 }
 
 pub struct Reservation{
-    pub inner: BTreeMap<RSId,RS_inner>
+    pub inner: BTreeMap<RSId,RSinner>
 }
