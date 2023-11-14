@@ -18,6 +18,6 @@ pub struct ROB_inner{
     pub state: ROB_State,
 } 
 
-pub struct RecordBuffer{
+pub struct ReorderBuffer{
     inner: BTreeMap<u8, ROB_inner>,
 }
