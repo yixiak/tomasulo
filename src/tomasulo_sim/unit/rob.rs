@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 const INST_COUNT: usize = 8;
 
-pub enum ROB_State{
+pub enum ROBState{
     Issue,
     Execute,
     WriteBack,
@@ -10,14 +10,14 @@ pub enum ROB_State{
     Waitting
 }
 
-pub struct ROB_inner{
+pub struct ROBInner{
     pub entry: u8,
     //pub type:
     pub value: i8,
     //pub dst: register
-    pub state: ROB_State,
+    pub state: ROBState,
 } 
 
 pub struct ReorderBuffer{
-    inner: BTreeMap<u8, ROB_inner>,
+    pub inner: BTreeMap<u8, ROBInner>,
 }

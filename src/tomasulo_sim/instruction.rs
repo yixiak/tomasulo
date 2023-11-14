@@ -1,6 +1,5 @@
 use std::str::FromStr;
 
-
 pub enum Type {
     LD,
     SD,
