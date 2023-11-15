@@ -2,6 +2,8 @@ use std::collections::BTreeMap;
 
 const INST_COUNT: usize = 8;
 
+pub struct ROBID(u8);
+
 pub enum ROBState{
     Issue,
     Execute,
@@ -19,5 +21,5 @@ pub struct ROBInner{
 } 
 
 pub struct ReorderBuffer{
-    pub inner: BTreeMap<u8, ROBInner>,
+    pub inner: BTreeMap<ROBID, ROBInner>,
 }
