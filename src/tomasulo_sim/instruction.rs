@@ -1,4 +1,6 @@
 use std::str::FromStr;
+
+use super::Value;
 pub enum Type {
     LD,
     SD,
@@ -11,9 +13,9 @@ pub enum Type {
 pub struct Instruction{
     pub op:Type,
 
-    // pub src1:
-    // pub src2:
-    // pub dest:
+    pub src1: Option<Value>,
+    pub src2: Option<Value>,
+    pub dest: Option<Value>,
 
     // when the instruction issued,
     // it may waitting for some value to execute

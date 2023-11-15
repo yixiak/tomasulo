@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
 
+use crate::tomasulo_sim::Value;
+
 pub enum RSType{
     LD,
     SD,
@@ -20,11 +22,11 @@ pub enum RSState{
 pub struct RSinner{
     pub op: RSType,
     pub state: RSState,
-    //pub vj: u8,
-    //pub vk: u8,
-    //pub qj: ROB
-    //pub qk: ROB
-    //pub dest: register
+    pub vj: Option<Value>,
+    pub vk: Option<Value>,
+    pub qj: Option<Value>,
+    pub qk: Option<Value>,
+    pub dest: Option<Value>,
 
     // when the instruction issued,
     // it may waitting for some value to execute

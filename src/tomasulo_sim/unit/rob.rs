@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
 
+use crate::tomasulo_sim::Value;
+
 const INST_COUNT: usize = 8;
 
 pub struct ROBID(u8);
@@ -15,7 +17,7 @@ pub enum ROBState{
 pub struct ROBInner{
     pub entry: u8,
     //pub type:
-    pub value: i8,
+    pub value: Option<Value>,
     //pub dst: register
     pub state: ROBState,
 } 

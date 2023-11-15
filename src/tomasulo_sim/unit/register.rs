@@ -1,15 +1,19 @@
-use crate::tomasulo_sim::value::Value;
+use crate::tomasulo_sim::Value;
 
 use super::ROBID;
 
-
+// use for Fx
+pub struct RFID(u8);
 const REGFILE_COUNT:usize=16;
 
 pub struct RegFile{
-    inner: [PFinner;REGFILE_COUNT]
+    inner: [RFinner;REGFILE_COUNT]
 }
 
-pub struct PFinner{
+pub struct RFinner{
     pub src: Option<ROBID>,
     pub value: Option<Value>
 }
+
+// use for Rx
+pub struct RegID(u8);
