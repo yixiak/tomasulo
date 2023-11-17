@@ -4,6 +4,7 @@ use crate::tomasulo_sim::Value;
 
 const INST_COUNT: usize = 8;
 
+#[derive(Debug)]
 pub struct ROBID(u8);
 
 pub enum ROBState{

@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use super::Value;
+use super::{Value, Unit};
 pub enum Type {
     LD,
     SD,
@@ -15,7 +15,7 @@ pub struct Instruction{
 
     pub src1: Option<Value>,
     pub src2: Option<Value>,
-    pub dest: Option<Value>,
+    pub dest: Unit,
 
     // when the instruction issued,
     // it may waitting for some value to execute
@@ -30,13 +30,41 @@ pub struct Instruction{
     
 }
 
-// get a Instruction for str
-impl FromStr for Instruction{
-    type Err=();
+// // get a Instruction form str
+// impl FromStr for Instruction{
+//     type Err=();
 
-    fn from_str(s: &str) -> Result<Self, Self::Err>{
-        let parts=s.split_whitespace();
+//     fn from_str(s: &str) -> Result<Self, Self::Err>{
+//         let mut parts=s.split_whitespace();
+//         let op= parts.next().expect("no op").parse()?;
+//         let dest = parts.next().parse()?;
+//         let src1 = parts.next().parse()?;
+//         let src2 = parts.next().parse()?;
+        
+//         return Ok(Self { 
+//             op, 
+//             src1,
+//             src2,
+//             dest,
+//             issue_cycle: None, 
+//             execute_begin_cycle: None, 
+//             execute_end_cycle: None, 
+//             write_back_cycle: None, 
+//             commit_cycle: None })
+//     }
+// }
 
-        return Ok(Self { op: (), issue_cycle: (), execute_begin_cycle: (), execute_end_cycle: (), write_back_cycle: (), commit_cycle: () })
+impl FromStr for Type{
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "ADDD"=>Ok(Type::ADDD),
+            "SUB"=>Ok(Type::SUBD),
+            "MULTD"=>Ok(Type::MULTD),
+            "DIVD"=>Ok(Type::DIVD),
+            "LD"=>Ok(Type::LD),
+            "SD"=>Ok(Type::SD),
+            _=>Err(()),
+        }
     }
 }
