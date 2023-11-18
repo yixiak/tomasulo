@@ -7,11 +7,13 @@ use super::ROBID;
 pub struct RFID(u8);
 const REGFILE_COUNT:usize=16;
 
-pub struct RegFile{
-    inner: [RFinner;REGFILE_COUNT]
+#[derive(Debug)]
+pub struct FRegFile{
+    inner: [FRFinner;REGFILE_COUNT]
 }
 
-pub struct RFinner{
+#[derive(Debug)]
+pub struct FRFinner{
     pub src: Option<ROBID>,
     pub value: Option<Value>
 }
@@ -29,5 +31,24 @@ impl RegID {
 impl RFID {
     pub fn new(id:u8)->RFID{
         RFID(id)
+    }
+}
+
+impl FRegFile{
+    pub fn new()->FRegFile{
+        let inner: [FRFinner; REGFILE_COUNT] = Default::default();
+        FRegFile { inner }
+    }
+}
+
+impl FRFinner{
+    pub fn new()->FRFinner{
+        FRFinner { src:None, value: None }
+    }
+}
+
+impl Default for FRFinner {
+    fn default() -> Self {
+        FRFinner { src: None, value: None }
     }
 }
