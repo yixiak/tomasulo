@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use super::Unit;
+use super::{Unit, Type};
 
 pub type Value = Rc<ValueInner>;
 
@@ -14,7 +14,7 @@ pub enum ValueInner {
     /// A memory address.
     MemAddr(Value),
     // A operation.
-    // Op(Type, Value, Value),
+    Op(Type, Value, Value),
 }
 
 impl From<i64> for ValueInner {
