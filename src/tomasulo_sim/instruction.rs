@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use super::{Value, Unit};
-#[derive(Debug)]
+#[derive(Debug,Clone,Copy)]
 pub enum Type {
     LD,
     SD,
@@ -11,7 +11,7 @@ pub enum Type {
     DIVD,
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct Instruction{
     pub op:Type,
     pub src1: Option<Value>,

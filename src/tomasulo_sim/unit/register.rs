@@ -2,7 +2,7 @@ use crate::tomasulo_sim::Value;
 
 use super::ROBID;
 
-#[derive(Debug)]
+#[derive(Debug,Clone,Copy)]
 // use for Fx
 pub struct RFID(u8);
 const REGFILE_COUNT:usize=16;
@@ -18,7 +18,7 @@ pub struct FRFinner{
     pub value: Option<Value>
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone,Copy)]
 // use for Rx
 pub struct RegID(u8);
 
@@ -38,6 +38,11 @@ impl FRegFile{
     pub fn new()->FRegFile{
         let inner: [FRFinner; REGFILE_COUNT] = Default::default();
         FRegFile { inner }
+    }
+
+    // get a FRF in RFID
+    pub fn get(&self,id:&RFID)->&FRFinner{
+        &self.inner[id.0 as usize]
     }
 }
 

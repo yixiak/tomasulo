@@ -9,7 +9,7 @@ pub use fu::*;
 pub use register::*;
 pub use rob::*;
 
-#[derive(Debug)]
+#[derive(Debug,Clone,Copy)]
 pub enum Unit {
     Rob(ROBID),
 

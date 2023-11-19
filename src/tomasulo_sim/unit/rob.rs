@@ -1,10 +1,12 @@
 use std::collections::BTreeMap;
 
-use crate::tomasulo_sim::Value;
+use crate::tomasulo_sim::{Value, Instruction};
+
+use super::Unit;
 
 const INST_COUNT: usize = 8;
 
-#[derive(Debug,Hash,PartialEq, PartialOrd, Ord, Eq)]
+#[derive(Debug,Hash,PartialEq, PartialOrd, Ord, Eq,Clone,Copy)]
 pub struct ROBID(usize);
 
 #[derive(Debug)]
@@ -22,7 +24,7 @@ pub struct ROBInner{
     pub entry: usize,
     //pub type:
     pub value: Option<Value>,
-    pub dst: Option<Value>,
+    pub dst: Option<Unit>,
     pub state: ROBState,
 } 
 
@@ -42,8 +44,16 @@ impl ReorderBuffer{
                 ROBInner::new(index)
             );
         }
-
         ReorderBuffer { inner }
+    }
+
+    pub fn insert(&mut self,inst: &Instruction,entry: &usize){
+        let robid=ROBID(*entry);
+        if let Some(rob_entry) = self.inner.get_mut(&robid){
+            rob_entry.entry=*entry;
+            rob_entry.state=ROBState::Issue;
+            rob_entry.dst.replace(inst.dest.clone());
+        }
     }
 }
 
@@ -56,4 +66,5 @@ impl ROBInner{
             state: ROBState::Free,
         }
     }
+
 }

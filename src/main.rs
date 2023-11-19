@@ -1,3 +1,7 @@
+use std::collections::VecDeque;
+
+use tomasulo_sim::{Executor, Instruction};
+
 pub mod tomasulo_sim;
 fn main() {
     // test instruction
@@ -20,5 +24,12 @@ fn main() {
         "MULTD F6 F0 F2",
         "SD F6 0 R1"
     ];
-    
+
+    let mut ex1=Executor::new();
+    let i1:VecDeque<Instruction>=input1
+                                .iter()
+                                .map(|&s| s.parse().unwrap())
+                                .collect();
+    ex1.add_inst(&i1);
+    ex1.run();
 }

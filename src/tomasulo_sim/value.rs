@@ -3,7 +3,7 @@ use super::{Unit, Type};
 
 pub type Value = Rc<ValueInner>;
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub enum ValueInner {
     /// An immediate value.
     Imm(i64),
