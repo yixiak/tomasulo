@@ -82,7 +82,7 @@ impl FromStr for Type{
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "ADDD"=>Ok(Type::ADDD),
-            "SUB"=>Ok(Type::SUBD),
+            "SUBD"=>Ok(Type::SUBD),
             "MULTD"=>Ok(Type::MULTD),
             "DIVD"=>Ok(Type::DIVD),
             "LD"=>Ok(Type::LD),

@@ -26,10 +26,17 @@ fn main() {
     ];
 
     let mut ex1=Executor::new();
-    let i1:VecDeque<Instruction>=input1
+    let i1=input1
                                 .iter()
-                                .map(|&s| s.parse().unwrap())
+                                .map(|&s| 
+                                    match s.parse::<Instruction>(){
+                                        Ok(inst)=>inst,
+                                        Err(_)=>{panic!("Instruction parse error!");
+                                        }
+                                    }
+                                )
                                 .collect();
     ex1.add_inst(&i1);
-    ex1.run();
+    ex1.issue();
+    println!("{:?}",ex1);
 }
