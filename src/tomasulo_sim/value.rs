@@ -41,3 +41,12 @@ impl From<Value> for ValueInner {
         return ValueInner::MemAddr(v);
     }
 }
+
+// Copy from gztime/tomasulo-sim/src/value.rs
+pub fn new(inner: ValueInner) -> Value {
+    Rc::new(inner)
+}
+
+pub fn apply_op(t: Type, v1: Value, v2: Value) -> Value {
+    new(ValueInner::Op(t, v1, v2))
+}

@@ -47,9 +47,10 @@ impl Executor{
             if let Some(rs_entry_id) = self.rs.get_free(inst.op) {
                 // put the inst into rs and rob
                 // use insts_issued to index
-                self.rob.insert(&inst,&self.insts_issued);
-                self.rs.insert(inst, &self.freg,rs_entry_id,&self.cycle);
                 
+                self.rs.insert(&inst, &self.freg,rs_entry_id,&self.cycle,&self.insts_issued);
+                self.rob.insert(inst,&self.insts_issued);
+                self.insts_issued += 1;
                 return;
             }
             // there is no free rs
@@ -57,8 +58,23 @@ impl Executor{
         };
     }
 
-    pub fn run(&mut self){
+    pub fn calc(&mut self)->Vec<Instruction>{
+        // the write back ROBID
+        let wb_vec=self.rs.calc(&self.cycle);
+        let comp=self.rob.calc(wb_vec,&mut self.rs);
+        comp
+    }
 
+    pub fn run(&mut self){
+        while !self.finished{
+            self.cycle += 1;
+            self.issue();
+            
+            let comp = self.calc();
+
+
+            
+        }
     }
 }
 

@@ -1,6 +1,12 @@
 use std::str::FromStr;
 
-use super::{Value, Unit};
+use super::{Value, Unit, ROBID,value::apply_op, ValueInner};
+
+const LD_CYCLE:u8 = 2;
+const ADD_CYCLE:u8 = 2;
+const MULT_CYCLE:u8 = 10;
+const DIVD_CYCLE:u8 = 20;
+
 #[derive(Debug,Clone,Copy)]
 pub enum Type {
     LD,
@@ -27,7 +33,9 @@ pub struct Instruction{
     pub execute_end_cycle: Option<u8>,
     pub write_back_cycle: Option<u8>,
     pub commit_cycle: Option<u8>,
-    
+
+    pub required_cycle: u8,    
+    pub robid: Option<ROBID>
     
 }
 
@@ -64,6 +72,16 @@ impl FromStr for Instruction{
                         .into()
             }
         }));
+
+        let mut required_cycle:u8=0;
+
+        match op {
+            Type::LD | Type::SD => required_cycle=LD_CYCLE,
+            Type::ADDD | Type::SUBD => required_cycle=ADD_CYCLE,
+            Type::MULTD => required_cycle=MULT_CYCLE,
+            Type::DIVD => required_cycle=DIVD_CYCLE,
+        }
+
         return Ok(Self { 
             op, 
             src1,
@@ -73,7 +91,10 @@ impl FromStr for Instruction{
             execute_begin_cycle: None, 
             execute_end_cycle: None, 
             write_back_cycle: None, 
-            commit_cycle: None })
+            commit_cycle: None,
+            required_cycle,
+            robid: None, 
+        })
     }
 }
 
@@ -92,6 +113,21 @@ impl FromStr for Type{
     }
 }
 
+impl Instruction{
+    pub fn apply(&mut self)->Value{
+        
+        match self.op {
+            Type::LD | Type::SD => {
+                let result = apply_op(Type::ADDD,self.src1.as_ref().unwrap().clone(),self.src2.as_ref().unwrap().clone());
+                Value::new(ValueInner::MemAddr(result))
+            }
+            _ =>{
+               apply_op(Type::ADDD,self.src1.as_ref().unwrap().clone(),self.src2.as_ref().unwrap().clone())
+            }
+        }
+
+    }
+}
 #[cfg(test)]
 mod tests {
     use crate::tomasulo_sim::Instruction;

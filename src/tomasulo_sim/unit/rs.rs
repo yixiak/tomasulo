@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 
-use crate::tomasulo_sim::{Value, Type, Instruction, ValueInner};
+use crate::tomasulo_sim::{Value, Type, Instruction, ValueInner, apply_op};
 
-use super::{FRegFile, ReorderBuffer, Unit, ROBID};
+use super::{FRegFile, Unit, ROBID};
 
 const LD_RS_COUNT:usize = 3;
 const SD_RS_COUNT:usize = 3;
@@ -23,6 +23,7 @@ pub struct RSId(usize,RSType);
 #[derive(Debug,PartialEq,Eq)]
 pub enum RSState{
     Busy,
+    Finished,
     Ready,
     Executing,
     Waitting,
@@ -100,13 +101,43 @@ impl Reservation {
         None
     }
 
-    pub fn insert(&mut self,inst:Instruction,freg:&FRegFile,id:RSId,cycle:&u8){
+    pub fn insert(&mut self,ins:&Instruction,freg:&FRegFile,id:RSId,cycle:&u8,inst_issued: &usize){
+        let mut inst = ins.clone();
+        inst.robid.replace(ROBID(*inst_issued));
         if let Some(rs_inner_entry) = self.inner.get_mut(&id){
             rs_inner_entry.modify(&inst,freg,id.0,cycle);
             rs_inner_entry.inst.replace(inst);
-            rs_inner_entry.state=RSState::Busy;
-
         }
+    }
+
+    pub fn calc(&mut self, cycle: &u8)->Vec<Instruction>{
+        // change the Ready into Executing
+        let mut writeback_vec = Vec::<Instruction>::new();
+        self.inner.iter_mut().for_each(|rs_entry| {
+            let mut entry = rs_entry.1;
+            match entry.state {
+                RSState::Ready => {
+                    entry.state=RSState::Executing;
+                    entry.execute_begin_cycle.replace(cycle.clone() as u8);
+                    entry.execute_cycle.replace(0);
+                }
+                RSState::Executing => {
+                    entry.execute_cycle.replace(entry.execute_cycle.unwrap()+1);
+                    if entry.is_finished() {
+                        entry.state = RSState::Finished;
+                        entry.inst.as_mut().unwrap().execute_end_cycle.replace(*cycle);
+                    }
+                }
+                // write back to ROB
+                RSState::Finished => {
+                    entry.inst.as_mut().unwrap().write_back_cycle.replace(*cycle);
+                    writeback_vec.push(entry.inst.as_mut().unwrap().clone());
+                    entry.clear();
+                }
+                _ => {}
+            }
+        });
+        writeback_vec
     }
 }
 
@@ -126,7 +157,7 @@ impl RSinner {
             issue_cycle: None, 
             execute_begin_cycle: None, 
             execute_cycle: None, 
-            write_back_cycle: None 
+            write_back_cycle: None,
         }
     }
 
@@ -135,14 +166,17 @@ impl RSinner {
         // use clone to aviod Transferting of ownership
         self.id=RSId(id,inst.op.clone().into());
         self.op=inst.op.clone().into();
-        self.state=RSState::Busy;
         match inst.op {
             Type::LD => {
                 // because the LD instructions on the top,
                 // we assume that the value is always ready
-                self.addr.replace(inst.src1.as_ref().unwrap().clone());
-                self.vk.replace(inst.src2.as_ref().unwrap().clone());
+                let addr = self.addr.as_ref().unwrap();
+                let vk = self.vk.as_ref().unwrap();
+                let addr = apply_op(Type::ADDD, addr.clone(), vk.clone());
+                self.addr.replace(Value::new(ValueInner::MemAddr(addr)));
+                self.vk.replace(vk.clone());
                 self.issue_cycle.replace(*cycle);
+                self.state=RSState::Ready;
                 
             },
             Type::SD => {
@@ -155,12 +189,14 @@ impl RSinner {
                     let reg = freg.get(&fregid);
 
                     match &reg.value{
-                        // there is not a value stored in the reg
+                        // there is a value stored in the reg
                         Some(value)=>{
                             self.vk.replace(value.clone());
+                            self.state=RSState::Ready;
                         }
                         None=>{
                             self.qk = reg.src;
+                            self.state=RSState::Waitting;
                         }
                     }
                 }
@@ -174,9 +210,11 @@ impl RSinner {
                             match &reg.value {
                                 Some(value)=>{
                                     self.vj.replace(value.clone());
+                                    self.state=RSState::Ready;
                                 }
                                 None=>{
                                     self.qj=reg.src;
+                                    self.state=RSState::Waitting;
                                 }
                             }
                         }
@@ -194,6 +232,7 @@ impl RSinner {
                                 }
                                 None=>{
                                     self.qk=reg.src;
+                                    self.state=RSState::Waitting;
                                 }
                             }
                         }
@@ -206,17 +245,36 @@ impl RSinner {
 
     }
 
+    pub fn clear(&mut self){
+        self.inst=None;
+        self.state = RSState::Free;
+        self.vj = None;
+        self.vk = None;
+        self.qj = None;
+        self.qk = None;
+        self.addr = None;
+        self.result=None;
+        self.issue_cycle=None;
+        self.execute_begin_cycle=None;
+        self.execute_cycle=None;
+        self.write_back_cycle=None;
+    }
+
+    pub fn is_finished(&mut self)->bool{
+        let mut flag:bool = false;
+        if self.execute_cycle.unwrap() == self.inst.as_ref().unwrap().required_cycle {
+            flag=true;
+        }
+        flag
+    }
 }
 
 impl From<Type> for RSType{
     fn from(value: Type) -> Self {
         match value {
-            Type::LD => RSType::LD,
-            Type::SD => RSType::LD,
-            Type::ADDD => RSType::ADD,
-            Type::SUBD => RSType::ADD,
-            Type::MULTD => RSType::MULT,
-            Type::DIVD => RSType::MULT,
+            Type::LD | Type::SD => RSType::LD,
+            Type::ADDD | Type::SUBD => RSType::ADD,
+            Type::MULTD | Type::DIVD=> RSType::MULT,
         }
     }
 }
