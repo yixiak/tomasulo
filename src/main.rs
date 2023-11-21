@@ -53,8 +53,5 @@ fn main() {
     ex1.run();
     ex2.add_inst(&i2);
     ex2.run();
-    println!("End");
-
-
     
 }
