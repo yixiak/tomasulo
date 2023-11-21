@@ -170,11 +170,8 @@ impl RSinner {
             Type::LD => {
                 // because the LD instructions on the top,
                 // we assume that the value is always ready
-                let addr = self.addr.as_ref().unwrap();
-                let vk = self.vk.as_ref().unwrap();
-                let addr = apply_op(Type::ADDD, addr.clone(), vk.clone());
-                self.addr.replace(Value::new(ValueInner::MemAddr(addr)));
-                self.vk.replace(vk.clone());
+                self.addr.replace(inst.src1.as_ref().unwrap().clone());
+                self.vk.replace(inst.src2.as_ref().unwrap().clone());
                 self.issue_cycle.replace(*cycle);
                 self.state=RSState::Ready;
                 

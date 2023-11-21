@@ -39,9 +39,11 @@ pub struct Instruction{
     
 }
 
+#[warn(unused_assignments)]
 // get a Instruction form str
 impl FromStr for Instruction{
     type Err=();
+
 
     fn from_str(s: &str) -> Result<Self, Self::Err>{
         let mut parts=s.split_whitespace();

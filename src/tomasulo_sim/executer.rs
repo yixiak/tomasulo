@@ -72,8 +72,10 @@ impl Executor{
             
             let comp = self.calc();
 
+            self.commited_insts.extend(comp.iter().cloned());
 
-            
+            self.finished = self.commited_insts.len()==self.insts_counts;
+               
         }
     }
 }
