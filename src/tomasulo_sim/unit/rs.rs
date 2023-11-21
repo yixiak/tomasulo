@@ -119,7 +119,7 @@ impl Reservation {
                 RSState::Ready => {
                     entry.state=RSState::Executing;
                     entry.execute_begin_cycle.replace(cycle.clone() as u8);
-                    entry.execute_cycle.replace(0);
+                    entry.execute_cycle.replace(1);
                 }
                 RSState::Executing => {
                     entry.execute_cycle.replace(entry.execute_cycle.unwrap()+1);
@@ -195,7 +195,7 @@ impl RSinner {
                             self.state=RSState::Ready;
                         }
                         None=>{
-                            self.qk = reg.src;
+                            self.qk.replace(reg.src.unwrap().clone());
                             self.state=RSState::Waitting;
                         }
                     }
@@ -213,7 +213,7 @@ impl RSinner {
                                     self.state=RSState::Ready;
                                 }
                                 None=>{
-                                    self.qj=reg.src;
+                                    self.qj.replace(reg.src.unwrap().clone());
                                     self.state=RSState::Waitting;
                                 }
                             }
@@ -231,7 +231,7 @@ impl RSinner {
                                     self.vk.replace(value.clone());
                                 }
                                 None=>{
-                                    self.qk=reg.src;
+                                    self.qk.replace(reg.src.unwrap().clone());
                                     self.state=RSState::Waitting;
                                 }
                             }

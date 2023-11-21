@@ -44,6 +44,10 @@ impl FRegFile{
     pub fn get(&self,id:&RFID)->&FRFinner{
         &self.inner[id.0 as usize]
     }
+
+    pub fn get_mut(&mut self,id:&RFID)-> &mut FRFinner{
+        &mut self.inner[id.0 as usize]
+    }
 }
 
 impl FRFinner{

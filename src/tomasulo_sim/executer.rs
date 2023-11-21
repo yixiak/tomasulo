@@ -61,7 +61,7 @@ impl Executor{
     pub fn calc(&mut self)->Vec<Instruction>{
         // the write back ROBID
         let wb_vec=self.rs.calc(&self.cycle);
-        let comp=self.rob.calc(wb_vec,&mut self.rs);
+        let comp=self.rob.calc(wb_vec,&mut self.rs,&self.cycle,&mut self.freg);
         comp
     }
 

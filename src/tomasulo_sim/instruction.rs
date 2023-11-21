@@ -114,7 +114,7 @@ impl FromStr for Type{
 }
 
 impl Instruction{
-    pub fn apply(&mut self)->Value{
+    pub fn apply(&self)->Value{
         
         match self.op {
             Type::LD | Type::SD => {
