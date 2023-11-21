@@ -13,7 +13,6 @@ pub struct ROBID(pub usize);
 pub enum ROBState{
     Free,
     Issue,
-    Execute,
     WriteBack,
     Commit,
     Waitting
@@ -65,6 +64,7 @@ impl ReorderBuffer{
             if let Some(robid) = inst.robid{
                if let Some(rob_entry) = self.inner.get_mut(&robid){
                     rob_entry.state = ROBState::WriteBack;
+                    rob_entry.inst.replace(inst.clone());
                     let result = inst.apply();
                     rob_entry.value.replace(result.clone());
                     rob_entry.broadcast(rs);
@@ -80,6 +80,7 @@ impl ReorderBuffer{
                 rob.1.commit(freg);
                 let inst = rob.1.inst.as_mut().unwrap();
                 inst.commit_cycle.replace(*cycle);
+                rob.1.state = ROBState::Commit;
                 comp.push(inst.clone());
             }else{
                 break;
@@ -87,6 +88,17 @@ impl ReorderBuffer{
         }
         comp
 
+    }
+
+    pub fn get_value(&self,id:&ROBID)->Option<Value>{
+        if let Some(entry) = self.inner.get(id){
+            match entry.value.clone() {
+                None=>None,
+                Some(value)=>Some(value.clone())
+            }
+        }else{
+            None
+        }    
     }
 }
 
@@ -143,9 +155,10 @@ impl ROBInner{
         match dest {
             Unit::RF(id)=>{
                 let reg = freg.get_mut(&id);
-                if reg.src.unwrap().clone()==ROBID(self.entry.clone()){
-                    reg.value = Some(value.unwrap());
-                }
+                // if reg.src.unwrap().clone()==ROBID(self.entry.clone()){
+                // ROB don't need if, because the instruction read src form ROB.
+                reg.value = Some(value.unwrap());
+                // }
             },
             _=>{}
         }

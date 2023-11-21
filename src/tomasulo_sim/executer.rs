@@ -48,13 +48,13 @@ impl Executor{
                 // put the inst into rs and rob
                 // use insts_issued to index
                 
-                self.rs.insert(&inst, &mut self.freg,rs_entry_id,&self.cycle,&self.insts_issued);
+                self.rs.insert(&inst, &mut self.freg,rs_entry_id,&self.rob,&self.cycle,&self.insts_issued);
                 self.rob.insert(inst,&self.insts_issued);
                 self.insts_issued += 1;
                 return;
             }
             // there is no free rs
-            self.insts.push_back(inst);
+            self.insts.push_front(inst);
         };
     }
 
@@ -75,7 +75,9 @@ impl Executor{
             self.commited_insts.extend(comp.iter().cloned());
 
             self.finished = self.commited_insts.len()==self.insts_counts;
-
+            if self.cycle > 200 {
+                panic!("Cycle limit exceeded. (200 cycles)");
+            }
         }
     }
 }

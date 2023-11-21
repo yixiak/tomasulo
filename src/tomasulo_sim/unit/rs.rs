@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 
-use crate::tomasulo_sim::{Value, Type, Instruction, ValueInner, apply_op};
+use crate::tomasulo_sim::{Value, Type, Instruction, ValueInner};
 
-use super::{FRegFile, Unit, ROBID, RFID};
+use super::{FRegFile, Unit, ROBID, ReorderBuffer};
 
 const LD_RS_COUNT:usize = 3;
 const SD_RS_COUNT:usize = 3;
@@ -101,13 +101,14 @@ impl Reservation {
         None
     }
 
-    pub fn insert(&mut self,ins:&Instruction,freg:&mut FRegFile,id:RSId,cycle:&u8,inst_issued: &usize){
+    pub fn insert(&mut self,ins:&Instruction,freg:&mut FRegFile,id:RSId,rob:&ReorderBuffer,cycle:&u8,inst_issued: &usize){
         let mut inst = ins.clone();
         inst.robid.replace(ROBID(*inst_issued));
+        inst.issue_cycle.replace(*cycle);
         if let Some(rs_inner_entry) = self.inner.get_mut(&id){
-            rs_inner_entry.modify(&inst,freg,id.0,cycle);
+            rs_inner_entry.modify(&mut inst,freg,rob,id.0,cycle);
             rs_inner_entry.inst.replace(inst);
-        }
+        }  
     }
 
     pub fn calc(&mut self, cycle: &u8)->Vec<Instruction>{
@@ -118,8 +119,11 @@ impl Reservation {
             match entry.state {
                 RSState::Ready => {
                     entry.state=RSState::Executing;
-                    entry.execute_begin_cycle.replace(cycle.clone() as u8);
-                    entry.execute_cycle.replace(1);
+                    entry.execute_begin_cycle.replace(cycle.clone()+1 as u8);
+                    entry.execute_cycle.replace(0);
+                    entry.inst.as_mut()
+                              .unwrap()
+                               .execute_begin_cycle.replace(cycle.clone()+1 as u8);
                 }
                 RSState::Executing => {
                     entry.execute_cycle.replace(entry.execute_cycle.unwrap()+1);
@@ -162,7 +166,7 @@ impl RSinner {
     }
 
     // modify rs from inst
-    pub fn modify(&mut self,inst:&Instruction,freg:&mut FRegFile,id:usize,cycle:&u8){
+    pub fn modify(&mut self,inst:&Instruction,freg:&mut FRegFile,rob:&ReorderBuffer,id:usize,cycle:&u8){
         // use clone to aviod Transferting of ownership
         self.id=RSId(id,inst.op.clone().into());
         self.op=inst.op.clone().into();
@@ -209,14 +213,29 @@ impl RSinner {
                     match *src1{
                         ValueInner::Unit(Unit::RF(rfid))=>{
                             let reg = freg.get(&rfid);
-                            match &reg.value {
-                                Some(value)=>{
-                                    self.vj.replace(value.clone());
-                                    self.state=RSState::Ready;
+                            match &reg.src {
+                                Some(robid)=>{
+                                    let result= rob.get_value(robid);
+                                    match result{
+                                        Some(value) =>{
+                                            self.vj=Some(value);
+                                            self.state=RSState::Ready;
+                                        }
+                                        None =>{                                    
+                                            self.qj.replace(reg.src.unwrap().clone());
+                                            self.state=RSState::Waitting;} 
+                                    }
                                 }
                                 None=>{
-                                    self.qj.replace(reg.src.unwrap().clone());
-                                    self.state=RSState::Waitting;
+                                    match &reg.value {
+                                        Some(value)=>{
+                                            self.vj.replace(value.clone());
+                                            self.state=RSState::Ready;
+                                        }
+                                        None=>{
+                                            panic!("src1 read reg error");
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -228,13 +247,30 @@ impl RSinner {
                     match *src2{
                         ValueInner::Unit(Unit::RF(rfid))=>{
                             let reg = freg.get(&rfid);
-                            match &reg.value {
-                                Some(value)=>{
-                                    self.vk.replace(value.clone());
+                            match &reg.src {
+                                Some(robid)=>{
+                                    let result= rob.get_value(robid);
+                                    match result{
+                                        Some(value) =>{
+                                            self.vk=Some(value);
+                                            self.state=RSState::Ready;
+                                        }
+                                        None =>{                                    
+                                            self.qk.replace(reg.src.unwrap().clone());
+                                            self.state=RSState::Waitting;} 
+                                    }
                                 }
                                 None=>{
-                                    self.qk.replace(reg.src.unwrap().clone());
-                                    self.state=RSState::Waitting;
+                                    match &reg.value {
+                                        Some(value)=>{
+                                            self.vk.replace(value.clone());
+                                            self.state=RSState::Ready;
+                                        }
+                                        None=>{
+                                            panic!("src2 read reg error");
+                                        }
+                                    }
+
                                 }
                             }
                         }
