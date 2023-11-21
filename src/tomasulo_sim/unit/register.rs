@@ -1,4 +1,4 @@
-use crate::tomasulo_sim::Value;
+use crate::tomasulo_sim::{Value,ValueInner};
 
 use super::ROBID;
 
@@ -58,6 +58,6 @@ impl FRFinner{
 
 impl Default for FRFinner {
     fn default() -> Self {
-        FRFinner { src: None, value: None }
+        FRFinner { src: None, value: Some(Value::new(ValueInner::Imm(1))) }
     }
 }

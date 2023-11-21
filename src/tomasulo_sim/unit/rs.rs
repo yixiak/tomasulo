@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use crate::tomasulo_sim::{Value, Type, Instruction, ValueInner, apply_op};
 
-use super::{FRegFile, Unit, ROBID};
+use super::{FRegFile, Unit, ROBID, RFID};
 
 const LD_RS_COUNT:usize = 3;
 const SD_RS_COUNT:usize = 3;
@@ -101,7 +101,7 @@ impl Reservation {
         None
     }
 
-    pub fn insert(&mut self,ins:&Instruction,freg:&FRegFile,id:RSId,cycle:&u8,inst_issued: &usize){
+    pub fn insert(&mut self,ins:&Instruction,freg:&mut FRegFile,id:RSId,cycle:&u8,inst_issued: &usize){
         let mut inst = ins.clone();
         inst.robid.replace(ROBID(*inst_issued));
         if let Some(rs_inner_entry) = self.inner.get_mut(&id){
@@ -162,7 +162,7 @@ impl RSinner {
     }
 
     // modify rs from inst
-    pub fn modify(&mut self,inst:&Instruction,freg:&FRegFile,id:usize,cycle:&u8){
+    pub fn modify(&mut self,inst:&Instruction,freg:&mut FRegFile,id:usize,cycle:&u8){
         // use clone to aviod Transferting of ownership
         self.id=RSId(id,inst.op.clone().into());
         self.op=inst.op.clone().into();
@@ -174,6 +174,11 @@ impl RSinner {
                 self.vk.replace(inst.src2.as_ref().unwrap().clone());
                 self.issue_cycle.replace(*cycle);
                 self.state=RSState::Ready;
+                if let Unit::RF(rfid) = inst.dest{
+                let reg=freg.get_mut(&rfid);
+                reg.src.replace(inst.robid.unwrap().clone());
+                reg.value=None;
+                }
                 
             },
             Type::SD => {
@@ -236,6 +241,12 @@ impl RSinner {
                         _=>{panic!("src2 error")}
                     }
                 }
+                if let Unit::RF(rfid) = inst.dest{
+                    let reg=freg.get_mut(&rfid);
+                    reg.src.replace(inst.robid.unwrap().clone());
+                    reg.value=None;
+                    }
+                
                 self.issue_cycle.replace(*cycle);
             }
         }

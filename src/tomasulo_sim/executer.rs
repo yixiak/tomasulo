@@ -48,7 +48,7 @@ impl Executor{
                 // put the inst into rs and rob
                 // use insts_issued to index
                 
-                self.rs.insert(&inst, &self.freg,rs_entry_id,&self.cycle,&self.insts_issued);
+                self.rs.insert(&inst, &mut self.freg,rs_entry_id,&self.cycle,&self.insts_issued);
                 self.rob.insert(inst,&self.insts_issued);
                 self.insts_issued += 1;
                 return;
@@ -75,7 +75,7 @@ impl Executor{
             self.commited_insts.extend(comp.iter().cloned());
 
             self.finished = self.commited_insts.len()==self.insts_counts;
-               
+
         }
     }
 }
