@@ -106,14 +106,17 @@ impl ROBInner{
         let value = self.value.clone();
         rs.inner.iter_mut().for_each(|rs_entry|{
             if rs_entry.1.state == RSState::Waitting{
-                if rs_entry.1.qj.unwrap().clone() == robid {
-                    rs_entry.1.qj=None;
-                    rs_entry.1.vj=value.clone();
+                if let Some(qj) = rs_entry.1.qj.clone(){
+                    if qj==robid{
+                        rs_entry.1.qj=None;
+                        rs_entry.1.vj=value.clone();
+                    }
                 }
-
-                if rs_entry.1.qk.unwrap().clone() == robid {
-                    rs_entry.1.qk=None;
-                    rs_entry.1.vk=value.clone();
+                if let Some(qk) = rs_entry.1.qk.clone(){
+                    if qk==robid{
+                        rs_entry.1.qk=None;
+                        rs_entry.1.vk=value.clone();
+                    }
                 }
 
                 // check the instruction's src 
