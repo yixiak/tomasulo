@@ -9,6 +9,7 @@ The project is based on the following principles：
 - In reservation station，there are 3 Load，3 Store，2 fadd and 2 fmult.
 - Record Buffer has 8 entries.
 - the instruction will begin execute 1 cycle after others write back the required result.
+- floatpoit registers are initialized to 1
 
 |Instruction|Ex cycle|
 |---|---|
@@ -44,5 +45,3 @@ SD F6 0 R1
 
 # Reference
 [GZTimeWalker/tomasulo-sim](https://github.com/GZTimeWalker/tomasulo-sim)
-
-[计算机体系结构-重排序缓存ROB](https://zhuanlan.zhihu.com/p/501631371)
