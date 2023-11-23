@@ -2,7 +2,7 @@ use std::{collections::BTreeMap, string, fmt::format};
 
 use console::style;
 
-use crate::tomasulo_sim::{Value, Type, Instruction, ValueInner};
+use crate::tomasulo_sim::{Value, Type, Instruction, ValueInner, apply_op};
 
 use super::{FRegFile, Unit, ROBID, ReorderBuffer};
 
@@ -137,7 +137,24 @@ impl Reservation {
                 // write back to ROB
                 RSState::Finished => {
                     entry.inst.as_mut().unwrap().write_back_cycle.replace(*cycle);
-                    writeback_vec.push(entry.inst.as_mut().unwrap().clone());
+                    // calculate the result and write back
+                    let op = entry.inst.as_ref().unwrap().op.clone();
+                    match op {
+                        Type::LD | Type::SD => {
+                            let v1 = entry.vk.clone();
+                            let v2 = entry.addr.clone();
+                            let mut result=apply_op(Type::ADDD, v1.unwrap(), v2.unwrap());
+                            result = Value::new(ValueInner::MemAddr(result));
+                            entry.inst.as_mut().unwrap().set_result(result);
+                        }
+                        _ => {
+                            let v1 = entry.vj.clone();
+                            let v2 = entry.vk.clone();
+                            let result=apply_op(op, v1.unwrap(), v2.unwrap());
+                            entry.inst.as_mut().unwrap().set_result(result);
+                        }
+                    }
+                    writeback_vec.push(entry.inst.as_ref().unwrap().clone());
                     entry.clear();
                 }
                 _ => {}
@@ -326,6 +343,7 @@ impl From<Type> for RSType{
 
 impl std::fmt::Display for Reservation{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+
         for inner in self.inner.values(){
             write!(f, "{inner}\n")?;
         }
@@ -368,7 +386,7 @@ impl std::fmt::Display for RSinner{
         };
 
         write!(f,
-            "{:<5} -> {},{},{:9},{:10},{:10},{:10},{}",
+            "{:<5} -> {}, {}, {:10}, {:10}, {:10}, {:10}, {}",
             entry, op,self.state,vj,vk,qj,qk,addr
         )
 

@@ -37,7 +37,8 @@ pub struct Instruction{
     pub commit_cycle: Option<u8>,
 
     pub required_cycle: u8,    
-    pub robid: Option<ROBID>
+    pub robid: Option<ROBID>,
+    result: Option<Value>
     
 }
 
@@ -98,6 +99,7 @@ impl FromStr for Instruction{
             commit_cycle: None,
             required_cycle,
             robid: None, 
+            result: None,
         })
     }
 }
@@ -118,18 +120,12 @@ impl FromStr for Type{
 }
 
 impl Instruction{
-    pub fn apply(&self)->Value{
-        
-        match self.op {
-            Type::LD | Type::SD => {
-                let result = apply_op(Type::ADDD,self.src1.as_ref().unwrap().clone(),self.src2.as_ref().unwrap().clone());
-                Value::new(ValueInner::MemAddr(result))
-            }
-            _ =>{
-               apply_op(self.op.clone(),self.src1.as_ref().unwrap().clone(),self.src2.as_ref().unwrap().clone())
-            }
-        }
-
+    
+    pub fn result(&self) -> Option<Value>{
+        self.result.clone()
+    }
+    pub fn set_result(&mut self, value:Value){
+        self.result.replace(value);
     }
 }
 
