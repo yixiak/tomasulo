@@ -62,6 +62,7 @@ impl ReorderBuffer{
     pub fn calc(&mut self,wv_vec:Vec<Instruction>,rs:&mut Reservation,cycle:&u8,freg:&mut FRegFile)->Vec<Instruction>{
         let mut comp = Vec::<Instruction>::new();
 
+        // write back the result and broadcast it
         for inst in wv_vec.iter(){
             if let Some(robid) = inst.robid{
                if let Some(rob_entry) = self.inner.get_mut(&robid){
@@ -74,7 +75,7 @@ impl ReorderBuffer{
             }    
         }
 
-        // commit 
+        // commit instruction
         for rob in self.inner.iter_mut(){
             if rob.1.state == ROBState::Commit {
                 continue;
@@ -133,7 +134,7 @@ impl ROBInner{
                     }
                 }
 
-                // check the instruction's src 
+                // check if the instruction is ready
                 match rs_entry.1.op {
                     RSType::LD | RSType::SD => {
                         if rs_entry.1.vk.is_some() {

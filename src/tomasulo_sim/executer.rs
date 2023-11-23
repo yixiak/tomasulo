@@ -68,11 +68,16 @@ impl Executor{
 
     pub fn run(&mut self){
         while !self.finished{
+
             println!("{:=^60}", style("=").bold());
+            
             self.cycle += 1;
             println!("{}{}",style(String::from("Cycle: ")).red().bold(),self.cycle);
+            
+            // issue one instruction pre cycle
             self.issue();
             
+            // collect the finish instruction 
             let comp = self.calc();
 
             self.commited_insts.extend(comp.iter().cloned());
@@ -97,7 +102,7 @@ impl Executor{
             
             println!("{:=^60}\n", style("=").bold());
             if self.cycle > 200 {
-                panic!("Cycle limit exceeded. ");
+                panic!("Cycle limit exceeded.");
             }
         }
     }

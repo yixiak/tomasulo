@@ -1,20 +1,21 @@
 pub mod rs;
-pub mod fu;
 pub mod register;
 pub mod rob;
 use std::str::FromStr;
 
 pub use rs::*;
-pub use fu::*;
 pub use register::*;
 pub use rob::*;
 
 #[derive(Debug,Clone,Copy,PartialEq, Eq, Hash)]
 pub enum Unit {
+    // Reorder Buffer item
     Rob(ROBID),
 
+    // Floatpoint register item
     RF(RFID),
 
+    // Immediate register item
     Reg(RegID)
 }
 
