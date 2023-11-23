@@ -24,7 +24,7 @@ pub struct RSId(usize,RSType);
 
 #[derive(Debug,PartialEq,Eq)]
 pub enum RSState{
-    Busy,
+    Begin,
     Finished,
     Ready,
     Executing,
@@ -121,11 +121,11 @@ impl Reservation {
             match entry.state {
                 RSState::Ready => {
                     entry.state=RSState::Executing;
-                    entry.execute_begin_cycle.replace(cycle.clone()+1 as u8);
-                    entry.execute_cycle.replace(0);
+                    entry.execute_begin_cycle.replace(cycle.clone() as u8);
+                    entry.execute_cycle.replace(1);
                     entry.inst.as_mut()
                               .unwrap()
-                               .execute_begin_cycle.replace(cycle.clone()+1 as u8);
+                               .execute_begin_cycle.replace(cycle.clone() as u8);
                 }
                 RSState::Executing => {
                     entry.execute_cycle.replace(entry.execute_cycle.unwrap()+1);
@@ -157,6 +157,9 @@ impl Reservation {
                     writeback_vec.push(entry.inst.as_ref().unwrap().clone());
                     entry.clear();
                 }
+                
+                // for the begin ld
+                RSState::Begin => entry.state=RSState::Ready,
                 _ => {}
             }
         });
@@ -196,7 +199,7 @@ impl RSinner {
                 self.addr.replace(inst.src1.as_ref().unwrap().clone());
                 self.vk.replace(inst.src2.as_ref().unwrap().clone());
                 self.issue_cycle.replace(*cycle);
-                self.state=RSState::Ready;
+                self.state=RSState::Begin;
                 if let Unit::RF(rfid) = inst.dest{
                 let reg=freg.get_mut(&rfid);
                 reg.src.replace(inst.robid.unwrap().clone());
@@ -407,10 +410,9 @@ impl std::fmt::Display for RSType {
 impl std::fmt::Display for RSState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            RSState::Busy=>write!(f,"{:6}","Busy"),
             RSState::Free=>write!(f,"{:6}","Free"),
             RSState::Executing=>write!(f,"{:6}","Exec"),
-            RSState::Ready=>write!(f,"{:6}","Ready"),
+            RSState::Ready|RSState::Begin=>write!(f,"{:6}","Ready"),
             RSState::Finished=>write!(f,"{:6}","Finish"),
             RSState::Waitting=>write!(f,"{:6}","Wait"),
         }
