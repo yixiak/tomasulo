@@ -1,4 +1,6 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, string, fmt::format};
+
+use console::style;
 
 use crate::tomasulo_sim::{Value, Type, Instruction, ValueInner};
 
@@ -253,18 +255,17 @@ impl RSinner {
                                     match result{
                                         Some(value) =>{
                                             self.vk=Some(value);
-                                            self.state=RSState::Ready;
                                         }
                                         None =>{                                    
                                             self.qk.replace(reg.src.unwrap().clone());
-                                            self.state=RSState::Waitting;} 
+                                            self.state=RSState::Waitting;
+                                        } 
                                     }
                                 }
                                 None=>{
                                     match &reg.value {
                                         Some(value)=>{
                                             self.vk.replace(value.clone());
-                                            self.state=RSState::Ready;
                                         }
                                         None=>{
                                             panic!("src2 read reg error");
@@ -319,6 +320,81 @@ impl From<Type> for RSType{
             Type::LD | Type::SD => RSType::LD,
             Type::ADDD | Type::SUBD => RSType::ADD,
             Type::MULTD | Type::DIVD=> RSType::MULT,
+        }
+    }
+}
+
+impl std::fmt::Display for Reservation{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for inner in self.inner.values(){
+            write!(f, "{inner}\n")?;
+        }
+        Ok(())
+    }
+}
+
+impl std::fmt::Display for RSinner{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+
+        let entry = format!("{}{}",self.op,self.id.0);
+
+        let op = match self.inst.as_ref(){
+            Some(inst)=> format!("{}",inst.op),
+            None => String::from("None "),
+        };
+
+        let vj = match self.vj.as_ref(){
+            Some(value)=>style(value.to_str()).bold(),
+            None=>style(String::from("None"))
+        };
+
+        let vk = match self.vk.as_ref(){
+            Some(value)=>style(value.to_str()),
+            None=>style(String::from("None"))
+        };
+
+        let qj = match self.qj.as_ref(){
+            Some(value)=>format!("{value}"),
+            None=>String::from("None")
+        };
+
+        let qk = match self.qk.as_ref(){
+            Some(value)=>format!("{value}"),
+            None=>String::from("None")
+        };
+        let addr = match self.addr.as_ref() {
+            Some(v) => style(format!("{v}")).white().bright(),
+            None => style(String::from("None ")).white(),
+        };
+
+        write!(f,
+            "{:<5} -> {},{},{:9},{:10},{:10},{:10},{}",
+            entry, op,self.state,vj,vk,qj,qk,addr
+        )
+
+    }
+}
+
+impl std::fmt::Display for RSType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RSType::ADD=> write!(f,"ADD"),
+            RSType::LD=> write!(f,"LD"),
+            RSType::MULT=> write!(f,"MULT"),
+            RSType::SD=>write!(f,"SD")
+        }
+    }
+}
+
+impl std::fmt::Display for RSState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RSState::Busy=>write!(f,"{:10}","Busy"),
+            RSState::Free=>write!(f,"{:10}","Free"),
+            RSState::Executing=>write!(f,"{:10}","Executing"),
+            RSState::Ready=>write!(f,"{:10}","Ready"),
+            RSState::Finished=>write!(f,"{:10}","Finished"),
+            RSState::Waitting=>write!(f,"{:10}","Waitting"),
         }
     }
 }
