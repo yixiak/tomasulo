@@ -1,3 +1,5 @@
+use std::fmt::write;
+
 use crate::tomasulo_sim::{Value,ValueInner};
 
 use super::ROBID;
@@ -5,7 +7,7 @@ use super::ROBID;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 // use for Fx
 pub struct RFID(u8);
-const REGFILE_COUNT:usize=16;
+const REGFILE_COUNT:usize=12;
 
 #[derive(Debug)]
 pub struct FRegFile{
@@ -72,5 +74,26 @@ impl std::fmt::Display for RFID {
 impl std::fmt::Display for RegID {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "R{:<1}",self.0)
+    }
+}
+
+impl std::fmt::Display for FRegFile {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut index=0;
+        for inner in self.inner.as_ref(){
+            write!(f,"F{:<8} : {}\n",index,inner)?;
+            index+=1;
+        }
+        Ok(())
+    }
+}
+
+impl std::fmt::Display for FRFinner {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.value.clone(){
+            Some(v)=>write!(f, "{}",v),
+            None => write!(f,"None")
+        }
+        
     }
 }

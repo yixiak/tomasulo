@@ -3,3 +3,4 @@ Cargo.lock
 *.txt
 *.pdf
 .vscode
+report.md

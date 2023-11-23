@@ -88,6 +88,10 @@ impl Executor{
             println!("{}",self.rob);
             println!("{}",style(String::from("Reservation Station:")).blue().bold());
             println!("{}",self.rs);
+
+            println!("{}",style(String::from("RegisterFile:")).black().bold());
+            println!("{}",self.freg);
+
             println!("{}",style(String::from("Instruction:")).green().bold());
             println!("{:<16}{:<7} {:<7} {:<7} {:<9} {:<7}",
                 "",
@@ -99,6 +103,7 @@ impl Executor{
             );
 
             self.commited_insts.iter().for_each(|inst| println!("{}",inst));
+            
             
             println!("{:=^60}\n", style("=").bold());
             if self.cycle > 200 {
