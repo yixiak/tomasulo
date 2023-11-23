@@ -1,5 +1,3 @@
-use std::fmt::write;
-
 use crate::tomasulo_sim::{Value,ValueInner};
 
 use super::ROBID;

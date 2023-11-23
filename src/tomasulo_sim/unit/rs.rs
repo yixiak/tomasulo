@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, string, fmt::format};
+use std::collections::BTreeMap;
 
 use console::style;
 
@@ -119,6 +119,7 @@ impl Reservation {
         self.inner.iter_mut().for_each(|rs_entry| {
             let mut entry = rs_entry.1;
             match entry.state {
+                // all the src are ready last cycle
                 RSState::Ready => {
                     entry.state=RSState::Executing;
                     entry.execute_begin_cycle.replace(cycle.clone() as u8);
@@ -137,7 +138,7 @@ impl Reservation {
                 // write back to ROB
                 RSState::Finished => {
                     entry.inst.as_mut().unwrap().write_back_cycle.replace(*cycle);
-                    // calculate the result and write back
+                    // calculate the result 
                     let op = entry.inst.as_ref().unwrap().op.clone();
                     match op {
                         Type::LD | Type::SD => {
@@ -236,6 +237,7 @@ impl RSinner {
                         ValueInner::Unit(Unit::RF(rfid))=>{
                             let reg = freg.get(&rfid);
                             match &reg.src {
+                                // get the src from ROB
                                 Some(robid)=>{
                                     let result= rob.get_value(robid);
                                     match result{
@@ -243,6 +245,7 @@ impl RSinner {
                                             self.vj=Some(value);
                                             self.state=RSState::Ready;
                                         }
+                                        // the instruction didn't write back
                                         None =>{                                    
                                             self.qj.replace(reg.src.unwrap().clone());
                                             self.state=RSState::Waitting;} 

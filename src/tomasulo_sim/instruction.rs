@@ -78,7 +78,7 @@ impl FromStr for Instruction{
             }
         }));
 
-        let mut required_cycle:u8=0;
+        let required_cycle:u8;
 
         match op {
             Type::LD | Type::SD => required_cycle=LD_CYCLE,
@@ -169,41 +169,5 @@ impl std::fmt::Display for Instruction{
             self.op,self.dest,self.src1.as_ref().unwrap().clone(),self.src2.as_ref().unwrap().clone(),
             issue,ex_begin,ex_end,write_back,commit
         )
-    }
-}
-#[cfg(test)]
-mod tests {
-    use crate::tomasulo_sim::Instruction;
-
-    #[test]
-    fn src_to_inst(){
-        let input1:[&str;6]=[
-        "LD F6 34+ R2",
-        "LD F2 45+ R3",
-        "MULTD F0 F2 F4",
-        "SUBD F8 F6 F2",
-        "DIVD F10 F0 F6",
-        "ADDD F6 F8 F2"
-    ];
-    let input2:[&str;8]=[
-        "LD F2 0 R2",
-        "LD F4 0 R3",
-        "DIVD F0 F4 F2",
-        "MULTD F6 F0 F2",
-        "ADDD F0 F4 F2",
-        "SD F6 0 R3",
-        "MULTD F6 F0 F2",
-        "SD F6 0 R1"
-    ];
-        for &inst in input1.iter(){
-            if let Ok(i) = inst.trim().parse::<Instruction>(){
-                                    println!("{:?}",i);
-                                }
-        };
-        for &inst in input2.iter(){
-            if let Ok(i) = inst.trim().parse::<Instruction>(){
-                                    println!("{:?}",i);
-                                }
-        };
     }
 }
