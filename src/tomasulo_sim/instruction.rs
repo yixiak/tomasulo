@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use console::style;
+
 use super::{Value, Unit, ROBID,value::apply_op, ValueInner};
 
 const LD_CYCLE:u8 = 2;
@@ -124,10 +126,37 @@ impl Instruction{
                 Value::new(ValueInner::MemAddr(result))
             }
             _ =>{
-               apply_op(Type::ADDD,self.src1.as_ref().unwrap().clone(),self.src2.as_ref().unwrap().clone())
+               apply_op(self.op.clone(),self.src1.as_ref().unwrap().clone(),self.src2.as_ref().unwrap().clone())
             }
         }
 
+    }
+}
+
+
+impl Type {
+    pub fn op_str(&self) -> &'static str {
+        match self {
+            Type::ADDD => "+",
+            Type::SUBD => "-",
+            Type::MULTD => "*",
+            Type::DIVD => "/",
+            _ => "",
+        }
+    }
+}
+
+impl std::fmt::Display for Type {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let s = match self {
+            Type::ADDD => style(format!("{self:?}")).green(),
+            Type::SUBD => style(format!("{self:?}")).red(),
+            Type::MULTD => style(format!("{self:?}")).yellow(),
+            Type::DIVD => style(format!("{self:?}")).blue(),
+            Type::LD => style(format!("{self:?}")).cyan(),
+            Type::SD => style(format!("{self:?}")).magenta(),
+        };
+        write!(f, "{s:<5}")
     }
 }
 #[cfg(test)]
