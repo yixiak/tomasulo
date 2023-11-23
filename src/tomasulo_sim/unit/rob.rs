@@ -74,7 +74,7 @@ impl ReorderBuffer{
             }    
         }
 
-        // commit
+        // commit 
         for rob in self.inner.iter_mut(){
             if rob.1.state == ROBState::Commit {
                 continue;
@@ -84,7 +84,7 @@ impl ReorderBuffer{
                 inst.commit_cycle.replace(*cycle+1);
                 rob.1.state = ROBState::Commit;
                 comp.push(inst.clone());
-            }else{
+                // only commit one instruction pre cycle
                 break;
             }
         }

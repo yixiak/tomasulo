@@ -413,7 +413,7 @@ impl std::fmt::Display for RSState {
             RSState::Free=>write!(f,"{:6}",style(String::from("Free")).cyan().bold()),
             RSState::Executing=>write!(f,"{:6}",style(String::from("Exec")).cyan().bold()),
             RSState::Ready|RSState::Begin=>write!(f,"{:6}",style(String::from("Ready")).cyan().bold()),
-            RSState::Finished=>write!(f,"{:6}",style(String::from("Finished")).cyan().bold()),
+            RSState::Finished=>write!(f,"{:6}",style(String::from("Finish")).cyan().bold()),
             RSState::Waitting=>write!(f,"{:6}",style(String::from("Wait")).cyan().bold()),
         }
     }

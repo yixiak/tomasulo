@@ -9,7 +9,7 @@ The project is based on the following principles：
 - In reservation station，there are 3 Load，3 Store，2 fadd and 2 fmult.
 - Record Buffer has 8 entries.
 - the instruction will begin execute 1 cycle after others write back the required result.
-- floatpoit registers are initialized to 1
+- floatpoit registers are initialized to 1.00
 
 |Instruction|Ex cycle|
 |---|---|

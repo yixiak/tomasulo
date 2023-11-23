@@ -58,7 +58,7 @@ impl FRFinner{
 
 impl Default for FRFinner {
     fn default() -> Self {
-        FRFinner { src: None, value: Some(Value::new(ValueInner::Imm(1))) }
+        FRFinner { src: None, value: Some(Value::new(ValueInner::Float(1.0))) }
     }
 }
 
