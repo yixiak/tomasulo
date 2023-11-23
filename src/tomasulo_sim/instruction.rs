@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use console::style;
 
-use super::{Value, Unit, ROBID,value::apply_op, ValueInner};
+use super::{Value, Unit, ROBID};
 
 const LD_CYCLE:u8 = 2;
 const ADD_CYCLE:u8 = 2;
@@ -153,6 +153,22 @@ impl std::fmt::Display for Type {
             Type::SD => style(format!("{self:?}")).magenta(),
         };
         write!(f, "{s:<5}")
+    }
+}
+
+impl std::fmt::Display for Instruction{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        
+        let issue = self.issue_cycle.unwrap().clone();
+        let ex_begin = self.execute_begin_cycle.unwrap().clone();
+        let ex_end = self.execute_end_cycle.unwrap().clone();
+        let write_back = self.write_back_cycle.unwrap().clone();
+        let commit = self.commit_cycle.unwrap().clone();
+        write!(f,
+            "{} {:<3} {:<3} {:<3}: {:<7} {:<8} {:<7} {:<9} {:<7}",
+            self.op,self.dest,self.src1.as_ref().unwrap().clone(),self.src2.as_ref().unwrap().clone(),
+            issue,ex_begin,ex_end,write_back,commit
+        )
     }
 }
 #[cfg(test)]

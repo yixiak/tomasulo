@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
 
+use console::style;
+
 use crate::tomasulo_sim::{Value, Instruction, Reservation, RSState, RSType};
 
 use super::{Unit, FRegFile};
@@ -51,7 +53,7 @@ impl ReorderBuffer{
         let robid=ROBID(*entry);
         if let Some(rob_entry) = self.inner.get_mut(&robid){
             rob_entry.entry=*entry;
-            rob_entry.state=ROBState::Issue;
+            rob_entry.state=ROBState::Waitting;
             rob_entry.dst.replace(inst.dest.clone());
             rob_entry.inst.replace(inst);
         }
@@ -65,7 +67,7 @@ impl ReorderBuffer{
                if let Some(rob_entry) = self.inner.get_mut(&robid){
                     rob_entry.state = ROBState::WriteBack;
                     rob_entry.inst.replace(inst.clone());
-                    let result = inst.apply();
+                    let result = inst.result().unwrap();
                     rob_entry.value.replace(result.clone());
                     rob_entry.broadcast(rs);
                }
@@ -79,7 +81,7 @@ impl ReorderBuffer{
             }else if rob.1.state == ROBState::WriteBack{
                 rob.1.commit(freg);
                 let inst = rob.1.inst.as_mut().unwrap();
-                inst.commit_cycle.replace(*cycle);
+                inst.commit_cycle.replace(*cycle+1);
                 rob.1.state = ROBState::Commit;
                 comp.push(inst.clone());
             }else{
@@ -162,5 +164,56 @@ impl ROBInner{
             },
             _=>{}
         }
+    }
+}
+
+impl std::fmt::Display for ROBID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ROB{}",self.0)
+    }
+}
+
+impl std::fmt::Display for ROBState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self{
+            ROBState::Free => write!(f, "{:<10}","Free"),
+            ROBState::Commit => write!(f,"{:<10}","Commited"),
+            ROBState::Waitting => write!(f,"{:<10}","Waitting"),
+            ROBState::WriteBack => write!(f,"{:<10}","WriteBack"),
+            ROBState::Issue => Ok(())
+        }
+        
+    }
+}
+
+impl std::fmt::Display for ROBInner{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let op = match self.inst.as_ref(){
+            Some(inst)=> format!("{:<6}",inst.op),
+            None => String::from("None "),
+        };
+
+        let value = match self.value.as_ref(){
+            Some(v)=>style(v.to_str()),
+            None => style(String::from("None")),
+        };
+
+        write!(f,
+        "{:<5} {:<10} {:<5} {:<10}",
+        self.entry,self.state,op,value
+        )
+    }
+}
+
+impl std::fmt::Display for ReorderBuffer{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        println!{
+            "{:<5} {:<10} {:<6} {:<10}",
+            "Entry","State","Type","Value"
+        }
+        for inner in self.inner.values(){
+            write!(f,"{}\n",inner)?;
+        }
+        Ok(())
     }
 }

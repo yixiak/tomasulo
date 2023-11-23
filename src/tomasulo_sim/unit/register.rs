@@ -2,7 +2,7 @@ use crate::tomasulo_sim::{Value,ValueInner};
 
 use super::ROBID;
 
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 // use for Fx
 pub struct RFID(u8);
 const REGFILE_COUNT:usize=16;
@@ -18,7 +18,7 @@ pub struct FRFinner{
     pub value: Option<Value>
 }
 
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 // use for Rx
 pub struct RegID(u8);
 
@@ -59,5 +59,18 @@ impl FRFinner{
 impl Default for FRFinner {
     fn default() -> Self {
         FRFinner { src: None, value: Some(Value::new(ValueInner::Imm(1))) }
+    }
+}
+
+impl std::fmt::Display for RFID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "F{:<1}",self.0)
+
+    }
+}
+
+impl std::fmt::Display for RegID {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "R{:<1}",self.0)
     }
 }

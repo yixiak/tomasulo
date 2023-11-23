@@ -407,12 +407,12 @@ impl std::fmt::Display for RSType {
 impl std::fmt::Display for RSState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            RSState::Busy=>write!(f,"{:10}","Busy"),
-            RSState::Free=>write!(f,"{:10}","Free"),
-            RSState::Executing=>write!(f,"{:10}","Executing"),
-            RSState::Ready=>write!(f,"{:10}","Ready"),
-            RSState::Finished=>write!(f,"{:10}","Finished"),
-            RSState::Waitting=>write!(f,"{:10}","Waitting"),
+            RSState::Busy=>write!(f,"{:6}","Busy"),
+            RSState::Free=>write!(f,"{:6}","Free"),
+            RSState::Executing=>write!(f,"{:6}","Exec"),
+            RSState::Ready=>write!(f,"{:6}","Ready"),
+            RSState::Finished=>write!(f,"{:6}","Finish"),
+            RSState::Waitting=>write!(f,"{:6}","Wait"),
         }
     }
 }

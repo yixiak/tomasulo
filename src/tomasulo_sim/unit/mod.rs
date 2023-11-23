@@ -9,7 +9,7 @@ pub use fu::*;
 pub use register::*;
 pub use rob::*;
 
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug,Clone,Copy,PartialEq, Eq, Hash)]
 pub enum Unit {
     Rob(ROBID),
 
@@ -57,6 +57,16 @@ impl From<RegID> for Unit {
     }
 }
 
+impl std::fmt::Display for Unit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self{
+            Unit::RF(id)=>write!(f,"{id}"),
+            Unit::Reg(id)=>write!(f,"{id}"),
+            Unit::Rob(id)=>write!(f,"{id}"),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::tomasulo_sim::Unit;
@@ -65,7 +75,7 @@ mod tests {
     fn unit_fromstr(){
         let r:Result<Unit, _>="R2".parse();
         match r {
-            Ok(u) => println!("{:?}",u),
+            Ok(u) => println!("{}",u),
             Err(_)=>panic!("Error"),
         }
     }

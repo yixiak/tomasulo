@@ -1,4 +1,5 @@
 use std::collections::VecDeque;
+use console::style;
 
 use super::*;
 
@@ -59,7 +60,7 @@ impl Executor{
     }
 
     pub fn calc(&mut self)->Vec<Instruction>{
-        // the write back ROBID
+        // the write back Instruction
         let wb_vec=self.rs.calc(&self.cycle);
         let comp=self.rob.calc(wb_vec,&mut self.rs,&self.cycle,&mut self.freg);
         comp
@@ -67,7 +68,9 @@ impl Executor{
 
     pub fn run(&mut self){
         while !self.finished{
+            println!("{:=^60}", style("=").bold());
             self.cycle += 1;
+            println!("{}{}",style(String::from("Cycle: ")).red().bold(),self.cycle);
             self.issue();
             
             let comp = self.calc();
@@ -75,8 +78,26 @@ impl Executor{
             self.commited_insts.extend(comp.iter().cloned());
 
             self.finished = self.commited_insts.len()==self.insts_counts;
+
+            println!("{}",style(String::from("Reorder Buffer:")).yellow().bold());
+            println!("{}",self.rob);
+            println!("{}",style(String::from("Reservation Station:")).blue().bold());
+            println!("{}",self.rs);
+            println!("{}",style(String::from("Instruction:")).green().bold());
+            println!("{:<16}{:<7} {:<7} {:<7} {:<9} {:<7}",
+                "",
+                style(String::from("Issue")).bold(),
+                style(String::from("ex_begin")).bold(),
+                style(String::from("ex_end")).bold(),
+                style(String::from("writeback")).bold(),
+                style(String::from("commit")).bold(),
+            );
+
+            self.commited_insts.iter().for_each(|inst| println!("{}",inst));
+            
+            println!("{:=^60}\n", style("=").bold());
             if self.cycle > 200 {
-                panic!("Cycle limit exceeded. (200 cycles)");
+                panic!("Cycle limit exceeded. ");
             }
         }
     }
