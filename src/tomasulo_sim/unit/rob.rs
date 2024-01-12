@@ -87,6 +87,8 @@ impl ReorderBuffer{
                 comp.push(inst.clone());
                 // only commit one instruction pre cycle
                 break;
+            }else{
+                break;
             }
         }
         comp
