@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use console::style;
 
-use crate::tomasulo_sim::{Value, Instruction, Reservation, RSState, RSType};
+use crate::tomasulo_sim::{Value, Instruction, Reservation, RSState, RSType, Lock_add, AddLock, MultLock, Lock_mult};
 
 use super::{Unit, FRegFile};
 
@@ -88,7 +88,7 @@ impl ReorderBuffer{
                 // only commit one instruction pre cycle
                 break;
             }else{
-                break;
+                break
             }
         }
         comp
@@ -143,9 +143,18 @@ impl ROBInner{
                             rs_entry.1.state=RSState::Ready;
                         }
                     }
-                    _ => {
-                        if rs_entry.1.vj.is_some() && rs_entry.1.vk.is_some(){
-                            rs_entry.1.state=RSState::Ready;
+                    RSType::ADD => {
+                        if rs_entry.1.vj.is_some() && rs_entry.1.vk.is_some() && AddLock() {
+                            rs_entry.1.state=RSState::Executing;
+                            rs_entry.1.execute_cycle.replace(0);
+                            Lock_add()
+                        }
+                    }
+                    RSType::MULT=>{
+                        if rs_entry.1.vj.is_some() && rs_entry.1.vk.is_some() && MultLock() {
+                            rs_entry.1.state=RSState::Executing;
+                            rs_entry.1.execute_cycle.replace(0);
+                            Lock_mult()
                         }
                     }
                 }
