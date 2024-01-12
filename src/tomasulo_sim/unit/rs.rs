@@ -459,7 +459,7 @@ impl std::fmt::Display for RSinner{
         };
 
         write!(f,
-            "{:<5} -> {}, {}, {:10}, {:10}, {:10}, {:10}, {}",
+            "{:<5} -> {}, {}, {:10}, {:10}, {:10}, {:10}, {};",
             entry, op,self.state,vj,vk,qj,qk,addr
         )
 

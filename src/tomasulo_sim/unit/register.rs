@@ -79,7 +79,7 @@ impl std::fmt::Display for FRegFile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut index=0;
         for inner in self.inner.as_ref(){
-            write!(f,"F{:<8} : {}\n",index,inner)?;
+            write!(f,"F{:<8} : {};\n",index,inner)?;
             index+=1;
         }
         Ok(())

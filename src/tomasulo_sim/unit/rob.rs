@@ -224,7 +224,7 @@ impl std::fmt::Display for ReorderBuffer{
             "Entry","State","Type","Value"
         }
         for inner in self.inner.values(){
-            write!(f,"{}\n",inner)?;
+            write!(f,"{};\n",inner)?;
         }
         Ok(())
     }

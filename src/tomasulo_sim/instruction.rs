@@ -178,7 +178,7 @@ impl std::fmt::Display for Instruction{
         
         //let ex_begin = self.execute_begin_cycle.unwrap().clone();
         write!(f,
-            "{} {:<3} {:<3} {:<3}: {:<7} {:<7} {:<9} {:<7}",
+            "{} {:<3} {:<3} {:<3}: {:<7} {:<7} {:<9} {:<7};",
             self.op,self.dest,self.src1.as_ref().unwrap().clone(),self.src2.as_ref().unwrap().clone(),
             issue,ex_end,write_back,commit
         )
