@@ -11,6 +11,39 @@ const SD_RS_COUNT:usize = 3;
 const ADD_RS_COUNT:usize = 2;
 const MULT_RS_COUNT:usize = 2;
 
+static mut add_lock:bool = true;
+static mut mult_lock:bool = true;
+
+pub fn Lock_add(){
+    unsafe{
+        add_lock = false
+    }
+}
+pub fn Unlock_add(){
+    unsafe{
+        add_lock = true
+    }
+}
+pub fn Lock_mult(){
+    unsafe{
+        mult_lock = false
+    }
+}
+
+pub fn Unlock_mult(){
+    unsafe{
+        mult_lock = true
+    }
+}
+
+pub fn AddLock()->bool{
+    unsafe{return add_lock==true}
+}
+
+pub fn MultLock()->bool{
+    unsafe{return mult_lock==true}
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum RSType{
     LD,
@@ -89,7 +122,9 @@ impl Reservation {
                 RSinner::new(RSType::MULT,index));
         }
 
-        Reservation { inner }
+        Reservation { 
+            inner,
+         }
     }
 
     pub fn get_free(&self, op:Type)->Option<RSId>{
@@ -102,7 +137,7 @@ impl Reservation {
         }
         None
     }
-
+    
     pub fn insert(&mut self,ins:&Instruction,freg:&mut FRegFile,id:RSId,rob:&ReorderBuffer,cycle:&u8,inst_issued: &usize){
         let mut inst = ins.clone();
         inst.robid.replace(ROBID(*inst_issued));
@@ -121,18 +156,50 @@ impl Reservation {
             match entry.state {
                 // all the src are ready last cycle
                 RSState::Ready => {
-                    entry.state=RSState::Executing;
-                    entry.execute_begin_cycle.replace(cycle.clone() as u8);
-                    entry.execute_cycle.replace(1);
-                    entry.inst.as_mut()
-                              .unwrap()
-                               .execute_begin_cycle.replace(cycle.clone() as u8);
+                    match entry.op{
+                        RSType::ADD=>{
+                            if AddLock() {
+                                Lock_add();
+                                entry.state=RSState::Executing;
+                                entry.execute_begin_cycle.replace(cycle.clone() as u8);
+                                entry.execute_cycle.replace(1);
+                                entry.inst.as_mut()
+                                        .unwrap()
+                                        .execute_begin_cycle.replace(cycle.clone() as u8);
+                            }
+                        }
+                        RSType::MULT=>{
+                            if MultLock(){
+                                Lock_mult();
+                                entry.state=RSState::Executing;
+                                entry.execute_begin_cycle.replace(cycle.clone() as u8);
+                                entry.execute_cycle.replace(1);
+                                entry.inst.as_mut()
+                                           .unwrap()
+                                           .execute_begin_cycle.replace(cycle.clone() as u8);
+                            }
+                        }
+                        _=>{
+                            entry.state=RSState::Executing;
+                            entry.execute_begin_cycle.replace(cycle.clone() as u8);
+                            entry.execute_cycle.replace(1);
+                            entry.inst.as_mut()
+                                       .unwrap()
+                                       .execute_begin_cycle.replace(cycle.clone() as u8);                            
+                        }
+                    }
+                    
                 }
                 RSState::Executing => {
                     entry.execute_cycle.replace(entry.execute_cycle.unwrap()+1);
                     if entry.is_finished() {
                         entry.state = RSState::Finished;
                         entry.inst.as_mut().unwrap().execute_end_cycle.replace(*cycle);
+                        match entry.op {
+                            RSType::ADD=> Unlock_add(),
+                            RSType::MULT=>Unlock_mult(),
+                            _=>{}
+                        }
                     }
                 }
                 // write back to ROB
