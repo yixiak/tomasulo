@@ -163,24 +163,24 @@ impl std::fmt::Display for Instruction{
         let ex_end = self.execute_end_cycle.unwrap().clone();
         let write_back = self.write_back_cycle.unwrap().clone();
         let commit = self.commit_cycle.unwrap().clone();
-        let mut ex_begin :u8 = 0;
-        if self.execute_begin_cycle.is_none(){
-            match self.op{
-                Type::LD | Type::SD => {ex_begin = ex_end-LD_CYCLE+1},
-                Type::ADDD | Type::SUBD => {ex_begin = ex_end-ADD_CYCLE+1},
-                Type::MULTD => {ex_begin = ex_end-MULT_CYCLE+1},
-                Type::DIVD => {ex_begin = ex_end-DIVD_CYCLE+1}
+        // let mut ex_begin :u8 = 0;
+        // if self.execute_begin_cycle.is_none(){
+        //     match self.op{
+        //         Type::LD | Type::SD => {ex_begin = ex_end-LD_CYCLE+1},
+        //         Type::ADDD | Type::SUBD => {ex_begin = ex_end-ADD_CYCLE+1},
+        //         Type::MULTD => {ex_begin = ex_end-MULT_CYCLE+1},
+        //         Type::DIVD => {ex_begin = ex_end-DIVD_CYCLE+1}
 
-            }
-        }else{
-            ex_begin = self.execute_begin_cycle.unwrap().clone();
-        }
+        //     }
+        // }else{
+        //     ex_begin = self.execute_begin_cycle.unwrap().clone();
+        // }
         
         //let ex_begin = self.execute_begin_cycle.unwrap().clone();
         write!(f,
-            "{} {:<3} {:<3} {:<3}: {:<7} {:<8} {:<7} {:<9} {:<7}",
+            "{} {:<3} {:<3} {:<3}: {:<7} {:<7} {:<9} {:<7}",
             self.op,self.dest,self.src1.as_ref().unwrap().clone(),self.src2.as_ref().unwrap().clone(),
-            issue,ex_begin,ex_end,write_back,commit
+            issue,ex_end,write_back,commit
         )
     }
 }

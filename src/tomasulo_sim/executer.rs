@@ -91,25 +91,21 @@ impl Executor{
 
             println!("{}",style(String::from("RegisterFile:")).black().bold());
             println!("{}",self.freg);
-
-            println!("{}",style(String::from("Instruction:")).green().bold());
-            println!("{:<16}{:<7} {:<7} {:<7} {:<9} {:<7}",
-                "",
-                style(String::from("Issue")).bold(),
-                style(String::from("ex_begin")).bold(),
-                style(String::from("ex_end")).bold(),
-                style(String::from("writeback")).bold(),
-                style(String::from("commit")).bold(),
-            );
-
-            self.commited_insts.iter().for_each(|inst| println!("{}",inst));
-            
             
             println!("{:=^60}\n", style("=").bold());
             if self.cycle > 200 {
                 panic!("Cycle limit exceeded.");
             }
         }
+        println!("{}",style(String::from("Instruction:")).green().bold());
+        println!("{:<16}{:<7} {:<7} {:<9} {:<7}",
+            "",
+            style(String::from("Issue")).bold(),
+            style(String::from("ex_comp")).bold(),
+            style(String::from("writeback")).bold(),
+            style(String::from("commit")).bold(),
+        );
+        self.commited_insts.iter().for_each(|inst| println!("{}",inst));
     }
 }
 
